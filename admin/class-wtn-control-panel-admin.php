@@ -116,24 +116,28 @@ class Wtn_Control_Panel_Admin {
 			}
 		} //admin_notices_init
 
+	/**
+	* 	Displays admin notices
+	* 
+	* @return			string				Admin notices
+	*/
+	public function display_admin_notices() {
+		$notices = get_option('wtn-control-panel-deferred-admin-notices');
+
+		if	( empty( $notices ) ) { return; }
+
+		foreach ($$notices as $notice) {
+			echo '<div class="' . esc_attr( $notice['class'] ) . '"><p>' . $notice['notice'] . '</p></div>';
+		}
+
+		delete_option( 'wtn-control-panel-deferred-admin-notices');
+	} //display_admin_notices
+
+
 
 	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Wtn_Control_Panel_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Wtn_Control_Panel_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wtn-control-panel-admin.css', array(), $this->version, 'all' );
-
-	}
+	} //enqueue styles
 
 	/**
 	 * Register the JavaScript for the admin area.
@@ -154,10 +158,250 @@ class Wtn_Control_Panel_Admin {
 		 * class.
 		 */
 
+		 /*
+		 * TODO: add enqueue script section, localization and fileuploader and anything that might be needed. 
+		 * Hooks needs to be here in the cp plugin
+		 * */
+
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wtn-control-panel-admin.js', array( 'jquery' ), $this->version, false );
 
-	}
+	} //enqueue_scripts
 
+	/**
+	 * Creates a checkbox field
+	 * 
+	 * @param		array		$args		The arguments for the field
+	 * @return		string					The HTML field
+	 */
 
+	public function field_checkbox( $args ) {
+		$defaults['class']							= '';
+		$defaults['description']					= '';
+		$defaults['label']							= '';
+		$defaults['name']							= $this->plugin_name . '-options[' . $args['id'] . ']';
+		$defaults['value']							= 0;
+
+		apply_filters($this->plugin_name . '-field-checkbox-options-defaults', $defaults);
+
+		$atts = wp_parse_args( $args, $defaults );
+
+		if ( ! empty( $this->options[$atts['id']] ) ) {
+			$atts['value'] = $this->options[$atts['id']];
+		}
+
+		// TODO: Write admin-field-checkbox.php
+		include( plugin_dir_path(__FILE__) . 'partials/' . $this->plugin_name - '-admin-field-checkbox.php');
+	} //field_checkbox
+
+	/**
+	 * Crates an editor field
+	 *
+	 * NOTE: ID must only be lowercase, no space, no dashes, no underscores.
+	 *
+	 * @param		array		$args		The arguments for the field
+	 * @return		string					The HTML field
+	*/
+
+	public function field_editor ( $args ) {
+		$defaults['description']				= '';
+		$defaults['settings']					= array( 'textarea_name' => $this->plugin_name . '-options[' . $args['id'] . ']' );
+		$defaults['value']						= '';
+
+		apply_filters( $this->plugin_name . '-field-editor-options-defaults', $defaults );
+
+		$atts = wp_parse_args( $args, $defaults );
+
+		if ( ! empty( $this->options[$atts['id']] ) ) {
+			$atts['value'] = $this->options[$atts['id']];
+		}
+
+		include( plugin_dir_path(__FILE__) . 'partials/' . $this->plugin_name . '-admin-field-editor.php' );
+
+	} //field_editor
+
+	/**
+	 * Creates a set of radios field
+	 * 
+	 * @param		array		$args		The arguments of the field
+	 * @return	string					The HTML field
+	*/
+
+	public function field_radios( $args ) {
+	   	$defaults['class']					= '';
+		$defaults['description']			= '';
+		$defaults['label']					= '';
+		$defaults['name']					= $this->plugin_name . '-options[' . $args['id'] . ']';
+		$defaults['value']					= 0;
+
+		apply_filters( $this->plugin_name . '-field-radios-options-defaults', $defaults );
+
+		$atts = wp_parse_args( $args, $defaults );
+
+		if ( ! empty( $this->options[$atts['id']] ) ) {
+			$atts['value'] = $this->options[$atts['id']];
+		}
+
+		include( plugin_dir_path(__FILE__) . 'partials/' . $this->plugin_name . '-admin-field-radios.php');
+
+	} //field_radios
+
+	public function field_repeater( $args ) {
+		$defaults['class'] 			= 'repeater';
+		$defaults['fields'] 		= array();
+		$defaults['id'] 			= '';
+		$defaults['label-add'] 		= 'Add Item';
+		$defaults['label-edit'] 	= 'Edit Item';
+		$defaults['label-header'] 	= 'Item Name';
+		$defaults['label-remove'] 	= 'Remove Item';
+		$defaults['title-field'] 	= '';
+	/*
+		$defaults['name'] 			= $this->plugin_name . '-options[' . $args['id'] . ']';
+	*/
+
+		apply_filters( $this->plugin_name . '-field-repeater-options-defaults', $defaults );
+		$setatts 	= wp_parse_args( $args, $defaults );
+		$count 		= 1;
+		$repeater 	= array();
+		if ( ! empty( $this->options[$setatts['id']] ) ) {
+			$repeater = maybe_unserialize( $this->options[$setatts['id']][0] );
+		}
+
+		if ( ! empty( $repeater ) ) {
+			$count = count( $repeater );
+		}
+
+		include( plugin_dir_path( __FILE__ ) . 'partials/' . $this->plugin_name . '-admin-field-repeater.php' );
+	} // field_repeater()
+
+	/**
+	 * Creates a select field
+	 *
+	 * Note: label is blank since its created in the Settings API
+	 *
+	 * @param 	array 		$args 			The arguments for the field
+	 * @return 	string 						The HTML field
+	*/
+		 
+	public function field_select( $args ) {
+		$defaults['aria'] 			= '';
+		$defaults['blank'] 			= '';
+		$defaults['class'] 			= 'widefat';
+		$defaults['context'] 		= '';
+		$defaults['description'] 	= '';
+		$defaults['label'] 			= '';
+		$defaults['name'] 			= $this->plugin_name . '-options[' . $args['id'] . ']';
+		$defaults['selections'] 	= array();
+		$defaults['value'] 			= '';
+
+		apply_filters( $this->plugin_name . '-field-select-options-defaults', $defaults );
+
+		$atts = wp_parse_args( $args, $defaults );
+
+		if ( ! empty( $this->options[$atts['id']] ) ) {
+			$atts['value'] = $this->options[$atts['id']];
+		}
+
+		if ( empty( $atts['aria'] ) && ! empty( $atts['description'] ) ) {
+			$atts['aria'] = $atts['description'];
+		} elseif ( empty( $atts['aria'] ) && ! empty( $atts['label'] ) ) {
+			$atts['aria'] = $atts['label'];
+		}
+
+		include( plugin_dir_path( __FILE__ ) . 'partials/' . $this->plugin_name . '-admin-field-select.php' );
+
+	} // field_select()
+
+	/**
+	 * Creates a text field
+	 *
+	 * @param 	array 		$args 			The arguments for the field
+	 * @return 	string 						The HTML field
+	 */
+	public function field_text( $args ) {
+		$defaults['class'] 			= 'text widefat';
+		$defaults['description'] 	= '';
+		$defaults['label'] 			= '';
+		$defaults['name'] 			= $this->plugin_name . '-options[' . $args['id'] . ']';
+		$defaults['placeholder'] 	= '';
+		$defaults['type'] 			= 'text';
+		$defaults['value'] 			= '';
+
+		apply_filters( $this->plugin_name . '-field-text-options-defaults', $defaults );
+
+		$atts = wp_parse_args( $args, $defaults );
+
+		if ( ! empty( $this->options[$atts['id']] ) ) {
+			$atts['value'] = $this->options[$atts['id']];
+		}
+
+		include( plugin_dir_path( __FILE__ ) . 'partials/' . $this->plugin_name . '-admin-field-text.php' );
+
+	} // field_text()
+
+	/**
+	 * Creates a textarea field
+	 *
+	 * @param 	array 		$args 			The arguments for the field
+	 * @return 	string 						The HTML field
+	 */
+	public function field_textarea( $args ) {
+		$defaults['class'] 			= 'large-text';
+		$defaults['cols'] 			= 50;
+		$defaults['context'] 		= '';
+		$defaults['description'] 	= '';
+		$defaults['label'] 			= '';
+		$defaults['name'] 			= $this->plugin_name . '-options[' . $args['id'] . ']';
+		$defaults['rows'] 			= 10;
+		$defaults['value'] 			= '';
+
+		apply_filters( $this->plugin_name . '-field-textarea-options-defaults', $defaults );
+
+		$atts = wp_parse_args( $args, $defaults );
+
+		if ( ! empty( $this->options[$atts['id']] ) ) {
+			$atts['value'] = $this->options[$atts['id']];
+		}
+
+		include( plugin_dir_path( __FILE__ ) . 'partials/' . $this->plugin_name . '-admin-field-textarea.php' );
+	} // field_textarea()
+
+	/**
+	 * Returns an array of options names, fields types, and default values
+	 * 
+	 * @return	array						An array of options
+	*/
+
+	public static function get_options_list() {
+		$options = array();
+
+		/**
+		* TODO: Write code here for options list. Example lines below.
+		*
+		* $options[] = array( 'message-no-openings', 'text', 'Thank you for your interest! There are no job openings at this time.' );
+		* $options[] = array( 'howtoapply', 'editor', '' );
+		* $options[] = array( 'repeat-test', 'repeater', array( array( 'test1', 'text' ), array( 'test2', 'text' ), array( 'test3', 'text' ) ) );
+		*/ 
+
+		return $options;
+
+	} // get_options_list()
+
+	/**
+	 * Adds links to the plugin links row
+	 * 
+	 * @since		1.0.0
+	 * @param		array		$links		The current array of row links
+	 * @param		string		$file		The name of the file
+	 * @return		array					The modified array of row links
+	 */
+	public function link_row( $links, $file) {
+		/**
+		 * TODO: write
+		 * 
+		 */
+
+		return $links;
+		}
+	} // links-row
 
 }
