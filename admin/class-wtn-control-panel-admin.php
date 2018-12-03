@@ -77,27 +77,54 @@ class Wtn_Control_Panel_Admin {
 	public function add_menu() {
 		//Top level page
 		//add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $position );
-
+		add_menu_page( $this->plugin_name, 
+					   esc_html__( 'WTN Control Panel', 'wtn-control-panel' ), 
+					   'manage_options', 
+					   $this->plugin_name . '-menu', 
+					   'wtn_menu_func', 
+					  'dashicons-groups', 
+					   11 );
+		
 		//Submenu page
 		//add_submenu_page( $parent_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
+		//videos
 		add_submenu_page(
-			'edit.php?post_type=job',
-			apply_filters($this->plugin_name . '-settings-page-title', esc_html__( 'WTN Control Panel Settings', 'wtn-control-panel' )),
-			apply_filters($this->plugin_name . '-settings-menu-title', esc_html__('Settings', 'wtn-control-panel')),
+			$this->plugin_name . '-menu',
+			$this->plugin_name . ' - Videok',
+			'Videok',
 			'manage_options',
-			$this->plugin_name . '-settings',
-			array( $this, 'page_options')
+			$this->plugin_name . '-submenu-videos',
+			'wtn-submenu-videos-func'
 		);
 
+		//GYIK
 		add_submenu_page(
-			'edit.php?post_type=job',
-			apply_filters( $this->plugin_name . '-settings-page-title', esc_html__( 'WTN Control Panel Help', 'wtn-control-panel')),
-			apply_filters( $this->plugin_name . '-settings-menu-title', esc_html__( 'Help', 'wtn-control-panel')),
+			$this->plugin_name . '-menu',
+			$this->plugin_name . ' - Gyakran Ismételt Kérdések',
+			'Gyakran Ismételt Kérdések',
 			'manage_options',
-			$this->plugin_name . 'help',
-			array($this, 'page_help')
+			$this->plugin_name . '-submenu-faq',
+			'wtn-submenu-faq-func'
 		);
+
+		// add_submenu_page(
+		// 	'edit.php?post_type=job',
+		// 	apply_filters($this->plugin_name . '-settings-page-title', esc_html__( 'WTN Control Panel Settings', 'wtn-control-panel' )),
+		// 	apply_filters($this->plugin_name . '-settings-menu-title', esc_html__('Settings', 'wtn-control-panel')),
+		// 	'manage_options',
+		// 	$this->plugin_name . '-settings',
+		// 	array( $this, 'page_options')
+		// );
+
+		// add_submenu_page(
+		// 	'edit.php?post_type=job',
+		// 	apply_filters( $this->plugin_name . '-settings-page-title', esc_html__( 'WTN Control Panel Help', 'wtn-control-panel')),
+		// 	apply_filters( $this->plugin_name . '-settings-menu-title', esc_html__( 'Help', 'wtn-control-panel')),
+		// 	'manage_options',
+		// 	$this->plugin_name . 'help',
+		// 	array($this, 'page_help')
+		// );
 	} //add_menu()	
 
 		/**
