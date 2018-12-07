@@ -15,8 +15,8 @@
  * @wordpress-plugin
  * Plugin Name:       WTN Control Panel
  * Plugin URI:        http://www.wisetreenaturals.hu
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
- * Version:           1.0.0
+ * Description:       A WTN által használt összes WP plugin egy helyen A menüből elérhető az összes bővítmény.
+ * Version:           0.0.1
  * Author:            TerraStorm Solutions
  * Author URI:        http://www.terrastormsolutions.com
  * License:           GPL-2.0+

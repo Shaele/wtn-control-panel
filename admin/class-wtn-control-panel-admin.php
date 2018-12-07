@@ -82,21 +82,21 @@ class Wtn_Control_Panel_Admin {
 					   'manage_options', 
 					   $this->plugin_name . '-menu', 
 					   'wtn_menu_func', 
-					  'dashicons-groups', 
+					   plugin_dir_url( __FILE__ ) . 'images/WTNlogo_virag_24x24_wp.png',  //'dashicons-groups', 
 					   11 );
 		
 		//Submenu page
 		//add_submenu_page( $parent_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
 		//videos
-		add_submenu_page(
-			$this->plugin_name . '-menu',
-			$this->plugin_name . ' - Videok',
-			'Videok',
-			'manage_options',
-			$this->plugin_name . '-submenu-videos',
-			'wtn-submenu-videos-func'
-		);
+		// add_submenu_page(
+		// 	$this->plugin_name . '-menu',
+		// 	$this->plugin_name . ' - Videok',
+		// 	'Videok',
+		// 	'manage_options',
+		// 	$this->plugin_name . '-submenu-videos'//,
+		// 	// new_wtn_video()
+		// );
 
 		//GYIK
 		add_submenu_page(
@@ -126,6 +126,25 @@ class Wtn_Control_Panel_Admin {
 		// 	array($this, 'page_help')
 		// );
 	} //add_menu()	
+	
+	// public static function new_wtn_video() {
+		
+	// } //new_wtn_video
+	public function cpt_wtn_video() {
+
+		register_post_type('wtn_videok',
+				array(
+						'labels' 				=> array(              
+						'name'               	=> __('Videok', 'wtn-videok'),
+						'singular_name'      	=> __('Video', 'wtn-videok'),
+						),
+						'supports' 				=> array('title', 'editor', 'thumbnail'),
+						'show_ui' 				=> true,
+						'show_in_nav_menus' 	=> false,
+						'show_in_menu' 			=> $this->plugin_name . '-menu',
+				)
+			);
+	}
 
 		/**
 		*	Manages any updates or upgrades needed before displaying notices.
@@ -428,7 +447,5 @@ class Wtn_Control_Panel_Admin {
 		 */
 
 		return $links;
-		}
 	} // links-row
-
 }
